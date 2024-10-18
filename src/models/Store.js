@@ -17,5 +17,6 @@ const StoreSchema = new mongoose.Schema({
   },
 });
 
+
 const Store = mongoose.model('Store', StoreSchema);
 module.exports = Store;

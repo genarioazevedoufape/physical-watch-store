@@ -11,6 +11,7 @@ app.use(express.json());
 //Connect to database
 conn();
 
+
 //Routes
 app.use('/store', StoreRoutes);
 
