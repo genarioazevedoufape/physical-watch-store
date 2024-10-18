@@ -1,22 +1,45 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const StoreSchema = new mongoose.Schema({
-  nome: String,
-  endereco: {
-    logradouro: String,
-    bairro: String,
-    cidade: String,
-    estado: String,
-    regiao: String,
-    localidade: String,
-    cep: String,
-  },
-  coordenadas: {
-    latitude: Number,
-    longitude: Number,
-  },
-});
-
-
-const Store = mongoose.model('Store', StoreSchema);
+const Store = mongoose.model(
+    'Store',
+    new Schema({
+        nome: {
+            type: String,
+            required: true
+        },
+        endereco: {
+            logradouro: {
+                type: String,
+                required: true
+            },
+            bairro: {
+                type: String,
+                required: true
+            },
+            cidade: {
+                type: String,
+                required: true
+            },
+            estado: {
+                type: String,
+                required: true
+            },
+            cep: {
+                type: String,
+                required: true
+            },
+        },
+        coordenadas: {
+            latitude: {
+                type: Number,
+                required: true
+            },
+            longitude: {
+                type: Number,
+                required: true
+            },
+        },
+    }, { timestamps: true })
+);
 module.exports = Store;

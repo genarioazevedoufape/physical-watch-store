@@ -4,6 +4,8 @@ module.exports = class StoreController {
  
     // create Store
     static createStore(req, res) {
-        res.json({ message: 'Create Store' });
+        Store.create(req.body)
+            .then(store => res.status(201).json(store))
+            .catch(err => res.status(500).json(err));
     }
 }
