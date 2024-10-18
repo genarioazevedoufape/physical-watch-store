@@ -8,4 +8,9 @@ module.exports = class StoreController {
             .then(store => res.status(201).json(store))
             .catch(err => res.status(500).json(err));
     }
+
+    static locateStore(req, res) {
+        res.status(200).json({message: 'Store located'});
+
+    }
 }

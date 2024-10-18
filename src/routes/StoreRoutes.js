@@ -7,4 +7,9 @@ router.post(
     StoreController.createStore,
 );
 
+router.get(
+    '/locate', 
+    StoreController.locateStore,
+);
+
 module.exports = router;
