@@ -1,0 +1,18 @@
+# Dependências do Node
+/node_modules
+
+# Arquivos compilados do TypeScript
+/dist
+
+# Arquivos de logs
+/logs/*.json
+
+# Arquivos de configuração do ambiente
+.env
+
+# Arquivos temporários
+*.tmp
+
+# IDEs e editores
+.vscode/
+
