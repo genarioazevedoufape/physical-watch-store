@@ -1,7 +1,7 @@
 const express = require('express');
 const conn = require('./db/conn')
 
-const StoreRoutes = require('./routes/StoreRoutes');
+const lojaRoutes = require('./routes/LojaRoutes');
 
 const app = express();
 
@@ -11,9 +11,8 @@ app.use(express.json());
 //Connect to database
 conn();
 
-
 //Routes
-app.use('/store', StoreRoutes);
+app.use('/loja', lojaRoutes);
 
 //Connect to server
 app.listen(3000, () => {

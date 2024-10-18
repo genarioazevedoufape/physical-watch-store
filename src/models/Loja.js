@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Store = mongoose.model(
-    'Store',
+const Loja = mongoose.model(
+    'Loja',
     new Schema({
         nome: {
             type: String,
@@ -42,4 +42,4 @@ const Store = mongoose.model(
         },
     }, { timestamps: true })
 );
-module.exports = Store;
+module.exports = Loja;
