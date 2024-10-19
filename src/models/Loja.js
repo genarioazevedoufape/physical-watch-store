@@ -30,16 +30,6 @@ const Loja = mongoose.model(
                 required: true
             },
         },
-        coordenadas: {
-            latitude: {
-                type: Number,
-                required: true
-            },
-            longitude: {
-                type: Number,
-                required: true
-            },
-        },
     }, { timestamps: true })
 );
 module.exports = Loja;
