@@ -1,6 +1,9 @@
 const express = require('express');
-const conn = require('./db/conn')
+const conn = require('./db/conn');
+const logger = require('./utils/logger');
 
+
+const PORT = process.env.PORT 
 const lojaRoutes = require('./routes/LojaRoutes');
 
 const app = express();
@@ -15,8 +18,8 @@ conn();
 app.use('/loja', lojaRoutes);
 
 //Connect to server
-app.listen(3000, () => {
-    console.log('Server is Servidor online port 3000');
+app.listen(PORT, () => {
+    logger.info(`Servidor rodando na porta ${PORT}`);
+    console.log('Servidor rodando na porta 3000');
 });
-
 
