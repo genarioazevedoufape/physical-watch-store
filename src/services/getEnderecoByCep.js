@@ -45,19 +45,19 @@ const getEnderecoByCep = async (cep) => {
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
             const errorMsg = 'Erro: Timeout ao tentar conectar com a API do OpenCage.';
-            logger.error(errorMsg, { cep, error: error.message }); // Log de erro
+            logger.error(errorMsg, { cep, error: error.message }); 
             throw new Error('Erro de conexão. O serviço de geocodificação está demorando para responder.');
         } else if (error.response && error.response.status === 403) {
             const errorMsg = 'Erro: A chave da API OpenCage pode estar incorreta ou você atingiu o limite de requisições.';
-            logger.error(errorMsg, { cep, error: error.message }); // Log de erro
+            logger.error(errorMsg, { cep, error: error.message }); 
             throw new Error('Erro de autenticação. Verifique sua chave de API do OpenCage.');
         } else if (error.response && error.response.status === 400) {
             const errorMsg = 'Erro: Solicitação inválida para a API do OpenCage.';
-            logger.error(errorMsg, { cep, error: error.message }); // Log de erro
+            logger.error(errorMsg, { cep, error: error.message }); 
             throw new Error('Erro na solicitação. Verifique se o CEP está correto.');
         } else {
             const errorMsg = `Erro ao buscar coordenadas para o CEP ${cep}.`;
-            logger.error(errorMsg, { cep, error: error.message || error }); // Log de erro genérico
+            logger.error(errorMsg, { cep, error: error.message || error }); 
             throw new Error('Erro ao buscar coordenadas. Verifique o formato do CEP ou tente novamente mais tarde.');
         }
     }
