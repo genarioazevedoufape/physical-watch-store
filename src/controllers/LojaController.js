@@ -2,6 +2,7 @@ const Loja = require('../models/Loja');
 
 const { converterCepCoordenadas } = require('../services/converterCepCoordenadas');
 const { calcularDistancia } = require('../utils/calcularDistancia');
+const { getEnderecoByCep } = require('../services/buscarEnderecoCep');
 
 const logger = require('../utils/logger'); 
 
@@ -18,40 +19,64 @@ module.exports = class LojaController {
                 return res.status(400).json({ message: 'O campo "nome" é obrigatório.' });
             }
 
-            // Validação do campo "logradouro"
-            if (!endereco || !endereco.logradouro) {
-                logger.warnLogger.warn('Logradouro inválido ao tentar criar uma loja', { logradouro: endereco?.logradouro }); 
-                return res.status(400).json({ message: 'O campo "logradouro" é obrigatório.' });
-            }
-
-            // Validação do campo "bairro"
-            if (!endereco.bairro) {
-                logger.warnLogger.warn('Bairro inválido ao tentar criar uma loja', { bairro: endereco?.bairro }); 
-                return res.status(400).json({ message: 'O campo "bairro" é obrigatório.' });
-            }
-
-            // Validação do campo "cidade"
-            if (!endereco.cidade) {
-                logger.warnLogger.warn('Cidade inválida ao tentar criar uma loja', { cidade: endereco?.cidade }); 
-                return res.status(400).json({ message: 'O campo "cidade" é obrigatório.' });
-            }
-
-            // Validação do campo "estado"
-            if (!endereco.estado) {
-                logger.warnLogger.warn('Estado inválido ao tentar criar uma loja', { estado: endereco?.estado }); 
-                return res.status(400).json({ message: 'O campo "estado" é obrigatório de 2 caracteres.' });
-            }
-
             // Validação do campo "cep"
             const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
-            if (!endereco.cep || !isValidCep(endereco.cep)) {
-                logger.warnLogger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep }); 
+            if (!endereco || !endereco.cep || !isValidCep(endereco.cep)) {
+                logger.warnLogger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep });
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
             }
 
-            // Criação da loja
-            const loja = await Loja.create(req.body);
-            logger.infoLogger.info('Loja criada com sucesso', { loja }); 
+            // Validação do campo "número"
+            if (!endereco.numero) {
+                logger.warnLogger.warn('Número inválido ao tentar criar uma loja', { numero: endereco?.numero });
+                return res.status(400).json({ message: 'O campo "número" é obrigatório.' });
+            }
+
+            // Buscar o endereço completo pelo CEP utilizando a API ViaCEP
+            const enderecoCompleto = await getEnderecoByCep(endereco.cep);
+
+            // Se o ViaCEP não encontrar o endereço
+            if (!enderecoCompleto) {
+                logger.warnLogger.warn('Endereço não encontrado para o CEP fornecido', { cep: endereco.cep });
+                return res.status(400).json({ message: 'CEP inválido ou não encontrado.' });
+            }
+
+             // Verificar se algum campo retornado é "não disponível"
+            const camposObrigatorios = ['logradouro', 'bairro', 'localidade', 'uf'];
+            const valoresNaoDisponiveis = {
+                logradouro: '',
+                bairro: '',
+                localidade: '',
+                uf: ''
+            };
+
+            // Checar se algum campo está "não disponível" e solicitar preenchimento pelo usuário
+            const camposPendentes = camposObrigatorios.filter(campo => 
+                enderecoCompleto[campo] === valoresNaoDisponiveis[campo]
+            );
+
+            if (camposPendentes.length > 0) {
+                logger.warnLogger.warn('Informações de endereço incompletas. Campos pendentes', { camposPendentes });
+                return res.status(400).json({
+                    message: `Os seguintes campos do endereço não foram encontrados e precisam ser fornecidos: ${camposPendentes.join(', ')}`,
+                    camposPendentes
+                });
+            }
+
+            // Preencher os campos de endereço com os dados retornados pela API ViaCEP
+            const novoEndereco = {
+                logradouro: enderecoCompleto.logradouro,
+                bairro: enderecoCompleto.bairro,
+                cidade: enderecoCompleto.localidade,
+                estado: enderecoCompleto.uf,
+                cep: endereco.cep,
+                numero: endereco.numero
+            };
+           
+            // Criação da loja com o endereço completo
+            const loja = await Loja.create({ nome, endereco: novoEndereco });
+
+            logger.infoLogger.info('Loja criada com sucesso', { loja });
             res.status(201).json(loja);
 
         } catch (err) {

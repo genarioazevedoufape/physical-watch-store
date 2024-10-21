@@ -25,6 +25,10 @@ const Loja = mongoose.model(
                 type: String,
                 required: true
             },
+            numero: {
+                type: String,
+                required: true
+            },
             cep: {
                 type: String,
                 required: true
