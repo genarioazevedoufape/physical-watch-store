@@ -8,63 +8,63 @@ const logger = require('../utils/logger');
 module.exports = class LojaController {
 
    // Criar uma nova loja
-   static async createLoja(req, res) {
-    try {
-        const { nome, endereco } = req.body;
+    static async createLoja(req, res) {
+        try {
+            const { nome, endereco } = req.body;
 
-        // Validação do campo "nome"
-        if (!nome) {
-            logger.warn('Nome inválido ao tentar criar uma loja', { nome }); 
-            return res.status(400).json({ message: 'O campo "nome" é obrigatório.' });
+            // Validação do campo "nome"
+            if (!nome) {
+                logger.warnLogger.warn('Nome inválido ao tentar criar uma loja', { nome }); 
+                return res.status(400).json({ message: 'O campo "nome" é obrigatório.' });
+            }
+
+            // Validação do campo "logradouro"
+            if (!endereco || !endereco.logradouro) {
+                logger.warnLogger.warn('Logradouro inválido ao tentar criar uma loja', { logradouro: endereco?.logradouro }); 
+                return res.status(400).json({ message: 'O campo "logradouro" é obrigatório.' });
+            }
+
+            // Validação do campo "bairro"
+            if (!endereco.bairro) {
+                logger.warnLogger.warn('Bairro inválido ao tentar criar uma loja', { bairro: endereco?.bairro }); 
+                return res.status(400).json({ message: 'O campo "bairro" é obrigatório.' });
+            }
+
+            // Validação do campo "cidade"
+            if (!endereco.cidade) {
+                logger.warnLogger.warn('Cidade inválida ao tentar criar uma loja', { cidade: endereco?.cidade }); 
+                return res.status(400).json({ message: 'O campo "cidade" é obrigatório.' });
+            }
+
+            // Validação do campo "estado"
+            if (!endereco.estado) {
+                logger.warnLogger.warn('Estado inválido ao tentar criar uma loja', { estado: endereco?.estado }); 
+                return res.status(400).json({ message: 'O campo "estado" é obrigatório de 2 caracteres.' });
+            }
+
+            // Validação do campo "cep"
+            const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
+            if (!endereco.cep || !isValidCep(endereco.cep)) {
+                logger.warnLogger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep }); 
+                return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
+            }
+
+            // Criação da loja
+            const loja = await Loja.create(req.body);
+            logger.infoLogger.info('Loja criada com sucesso', { loja }); 
+            res.status(201).json(loja);
+
+        } catch (err) {
+            logger.errorLogger.error('Erro ao criar a loja', { error: err.message });
+            res.status(500).json({ message: 'Erro ao criar a loja', error: err.message });
         }
-
-        // Validação do campo "logradouro"
-        if (!endereco || !endereco.logradouro) {
-            logger.warn('Logradouro inválido ao tentar criar uma loja', { logradouro: endereco?.logradouro }); 
-            return res.status(400).json({ message: 'O campo "logradouro" é obrigatório.' });
-        }
-
-        // Validação do campo "bairro"
-        if (!endereco.bairro) {
-            logger.warn('Bairro inválido ao tentar criar uma loja', { bairro: endereco?.bairro }); 
-            return res.status(400).json({ message: 'O campo "bairro" é obrigatório.' });
-        }
-
-        // Validação do campo "cidade"
-        if (!endereco.cidade) {
-            logger.warn('Cidade inválida ao tentar criar uma loja', { cidade: endereco?.cidade }); 
-            return res.status(400).json({ message: 'O campo "cidade" é obrigatório.' });
-        }
-
-        // Validação do campo "estado"
-        if (!endereco.estado) {
-            logger.warn('Estado inválido ao tentar criar uma loja', { estado: endereco?.estado }); 
-            return res.status(400).json({ message: 'O campo "estado" é obrigatório de 2 caracteres.' });
-        }
-
-        // Validação do campo "cep"
-        const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
-        if (!endereco.cep || !isValidCep(endereco.cep)) {
-            logger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep }); 
-            return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
-        }
-
-        // Criação da loja
-        const loja = await Loja.create(req.body);
-        logger.info('Loja criada com sucesso', { loja }); 
-        res.status(201).json(loja);
-
-    } catch (err) {
-        logger.error('Erro ao criar a loja', { error: err.message });
-        res.status(500).json({ message: 'Erro ao criar a loja', error: err.message });
-    }
 }
     // Localizar a loja mais próxima com base no CEP em um raio de 100 km
     static async localizarLoja(req, res) {
         try {
             const { cep } = req.params;
 
-            logger.info('Iniciando busca de loja mais próxima', { cep }); 
+            logger.infoLogger.info('Iniciando busca de loja mais próxima', { cep }); 
 
             // Buscar coordenadas pelo CEP do usuário
             const coordenadasUsuario = await converterCepCoordenadas(cep);
@@ -73,7 +73,7 @@ module.exports = class LojaController {
             const lojas = await Loja.find();
 
             if (lojas.length === 0) {
-                logger.warn('Nenhuma loja cadastrada.'); 
+                logger.warnLogger.warn('Nenhuma loja cadastrada.'); 
                 return res.status(404).json({ message: 'Nenhuma loja cadastrada.' });
             }
 
@@ -92,7 +92,7 @@ module.exports = class LojaController {
                         lojaMaisProxima = loja;
                     }
                 } catch (error) {
-                    logger.warn(`Erro ao buscar coordenadas para a loja: ${loja.nome}.`, { error: error.message }); 
+                    logger.warnLogger.warn(`Erro ao buscar coordenadas para a loja: ${loja.nome}.`, { error: error.message }); 
                 }
             });
 
@@ -100,11 +100,11 @@ module.exports = class LojaController {
 
             // Se não encontrar nenhuma loja dentro do raio de 100 km
             if (!lojaMaisProxima) {
-                logger.info('Nenhuma loja encontrada dentro de um raio de 100 km.', { cep }); 
+                logger.infoLogger.info('Nenhuma loja encontrada dentro de um raio de 100 km.', { cep }); 
                 return res.status(404).json({ message: 'Nenhuma loja encontrada dentro de um raio de 100 km.' });
             }
 
-            logger.info('Loja mais próxima encontrada', {
+            logger.infoLogger.info('Loja mais próxima encontrada', {
                 loja: lojaMaisProxima.nome,
                 distancia: `${menorDistancia.toFixed(2)} km`,
             }); 
@@ -123,7 +123,7 @@ module.exports = class LojaController {
             });
 
         } catch (error) {
-            logger.error('Erro ao localizar loja', { error: error.message || error }); 
+            logger.errorLogger.error('Erro ao localizar loja', { error: error.message || error }); 
             res.status(500).json({ message: 'Erro ao localizar loja', error: error.message });
         }
     }    

@@ -19,7 +19,7 @@ app.use('/loja', lojaRoutes);
 
 //Connect to server
 app.listen(PORT, () => {
-    logger.info(`Servidor rodando na porta ${PORT}`);
+    logger.loggerConn.info(`Servidor rodando na porta ${PORT}`);
     console.log('Servidor rodando na porta 3000');
 });
 

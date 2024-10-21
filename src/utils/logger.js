@@ -1,14 +1,44 @@
 const { createLogger, format, transports } = require('winston');
 const { combine, timestamp, json } = format;
 
-const logger = createLogger({
+const infoLogger = createLogger({
     format: combine(
         timestamp(),
         json()
     ),
     transports: [
-        new transports.File({ filename: 'logs/logs.json' })
+        new transports.File({ filename: 'logs/info.json' })
     ]
 });
 
-module.exports = logger;
+const loggerConn = createLogger( {
+    format: combine(
+        timestamp(),
+        json()
+    ),
+    transports: [
+        new transports.File({ filename: 'logs/connections.json' })
+    ]
+})
+
+const errorLogger = createLogger({
+    format: combine(
+        timestamp(),
+        json()
+    ),
+    transports: [
+        new transports.File({ filename: 'logs/error.json' })
+    ]
+});
+
+const warnLogger = createLogger({
+    format: combine(
+        timestamp(),
+        json()
+    ),
+    transports: [
+        new transports.File({ filename: 'logs/warn.json' })
+    ]
+});
+
+module.exports = { infoLogger, loggerConn, errorLogger, warnLogger };
