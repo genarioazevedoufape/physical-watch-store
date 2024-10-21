@@ -1,25 +1,25 @@
 const axios = require('axios');
-const logger = require('../utils/logger'); // Importar o logger
+const logger = require('../utils/logger'); 
 
 const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
 
 const getEnderecoByCep = async (cep) => {
     if (!isValidCep(cep)) {
         const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
-        logger.error(errorMsg, { cep }); // Log de erro
+        logger.error(errorMsg, { cep }); 
         throw new Error(errorMsg);
     }
 
     try {
-        logger.info('Iniciando busca de coordenadas para o CEP', { cep }); // Log de início da requisição
+        logger.info('Iniciando busca de coordenadas para o CEP', { cep }); 
 
         const response = await axios.get(`${process.env.OPENCAGE_BASE_URL}`, {
             params: {
                 q: cep,
                 key: process.env.OPENCAGE_API_KEY,
-                countrycode: 'br', // Limitar a busca ao Brasil
-                pretty: 1,          // Opcional: torna a resposta mais legível
-                limit: 1            // Retorna apenas o primeiro resultado
+                countrycode: 'br', 
+                pretty: 1,         
+                limit: 1            
             },
             timeout: 5000
         });
@@ -27,7 +27,7 @@ const getEnderecoByCep = async (cep) => {
         // Verificando se há resultados válidos
         if (response.data.results.length === 0) {
             const errorMsg = 'CEP não encontrado na base de dados geocodificada.';
-            logger.warn(errorMsg, { cep }); // Log de aviso
+            logger.warn(errorMsg, { cep }); 
             throw new Error(errorMsg);
         }
 

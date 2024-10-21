@@ -1,7 +1,7 @@
 ## Desafio: Backend de Loja Física
 
 ### Introdução
-Este é o primeiro desafio avaliativo do programa Bolsas CompassUol. O projeto consiste no desenvolvimento da estrutura de um backend para uma Physical Store, utilizando as tecnologias e conhecimentos adquiridos no curso.
+Este é o primeiro desafio avaliativo do programa Bolsas CompassUol. O projeto consiste no desenvolvimento da estrutura de um backend para uma Physical Store, utilizando as tecnologias e conhecimentos adquiridos no curso. O projeto servirá como base para construção de um e-commerce de relógios.
 
 ### Arquitetura do Sistema
 * **Tecnologias:**
