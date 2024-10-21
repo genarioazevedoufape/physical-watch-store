@@ -1,6 +1,6 @@
 const Loja = require('../models/Loja');
 
-const { getEnderecoByCep } = require('../services/getEnderecoByCep');
+const { converterCepCoordenadas } = require('../services/converterCepCoordenadas');
 const { calcularDistancia } = require('../utils/calcularDistancia');
 
 const logger = require('../utils/logger'); 
@@ -67,7 +67,7 @@ module.exports = class LojaController {
             logger.info('Iniciando busca de loja mais próxima', { cep }); 
 
             // Buscar coordenadas pelo CEP do usuário
-            const coordenadasUsuario = await getEnderecoByCep(cep);
+            const coordenadasUsuario = await converterCepCoordenadas(cep);
 
             // Obter todas as lojas cadastradas no banco de dados
             const lojas = await Loja.find();
@@ -83,7 +83,7 @@ module.exports = class LojaController {
             // Criar um array de promessas para buscar as coordenadas de cada loja
             const promessasCoordenadas = lojas.map(async (loja) => {
                 try {
-                    const coordenadasLoja = await getEnderecoByCep(loja.endereco.cep);
+                    const coordenadasLoja = await converterCepCoordenadas(loja.endereco.cep);
                     const distancia = calcularDistancia(coordenadasUsuario, coordenadasLoja);
 
                     // Se a distância for menor que 100 km e menor que a distância anterior

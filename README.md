@@ -40,7 +40,7 @@ Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
 4. **Executar a Aplicação**
 Execute o projeto via terminal:
     ```bash	
-    node src/index.js  
+    npm run dev  
 
 5. **Logs**
 Os logs gerados pela aplicação serão armazenados no arquivo logs/logs.json, contendo informações sobre as ações da aplicação.

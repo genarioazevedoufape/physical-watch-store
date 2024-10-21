@@ -3,7 +3,7 @@ const logger = require('../utils/logger');
 
 const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
 
-const getEnderecoByCep = async (cep) => {
+const converterCepCoordenadas = async (cep) => {
     if (!isValidCep(cep)) {
         const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
         logger.error(errorMsg, { cep }); 
@@ -63,4 +63,4 @@ const getEnderecoByCep = async (cep) => {
     }
 };
 
-module.exports = { getEnderecoByCep };
+module.exports = { converterCepCoordenadas };
