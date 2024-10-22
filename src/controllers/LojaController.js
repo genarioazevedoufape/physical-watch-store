@@ -2,20 +2,20 @@ const Loja = require('../models/Loja');
 
 const { converterCepCoordenadas } = require('../services/converterCepCoordenadas');
 const { calcularDistancia } = require('../utils/calcularDistancia');
-const { getEnderecoByCep } = require('../services/buscarEnderecoCep');
+const { buscarEnderecoCep } = require('../services/buscarEnderecoCep');
 
-const logger = require('../utils/logger'); 
+const logger = require('../utils/logger');
 
 module.exports = class LojaController {
 
-   // Criar uma nova loja
+    // Criar uma nova loja
     static async createLoja(req, res) {
         try {
             const { nome, endereco } = req.body;
 
             // Validação do campo "nome"
             if (!nome) {
-                logger.warnLogger.warn('Nome inválido ao tentar criar uma loja', { nome }); 
+                logger.warnLogger.warn('Nome inválido ao tentar criar uma loja', { nome });
                 return res.status(400).json({ message: 'O campo "nome" é obrigatório.' });
             }
 
@@ -33,7 +33,7 @@ module.exports = class LojaController {
             }
 
             // Buscar o endereço completo pelo CEP utilizando a API ViaCEP
-            const enderecoCompleto = await getEnderecoByCep(endereco.cep);
+            const enderecoCompleto = await buscarEnderecoCep(endereco.cep);
 
             // Se o ViaCEP não encontrar o endereço
             if (!enderecoCompleto) {
@@ -41,38 +41,35 @@ module.exports = class LojaController {
                 return res.status(400).json({ message: 'CEP inválido ou não encontrado.' });
             }
 
-             // Verificar se algum campo retornado é "não disponível"
+            // Verificar se algum campo retornado é "vazio"
             const camposObrigatorios = ['logradouro', 'bairro', 'localidade', 'uf'];
-            const valoresNaoDisponiveis = {
-                logradouro: '',
-                bairro: '',
-                localidade: '',
-                uf: ''
-            };
+            const camposPendentes = camposObrigatorios.filter(campo => !enderecoCompleto[campo]);
 
-            // Checar se algum campo está "não disponível" e solicitar preenchimento pelo usuário
-            const camposPendentes = camposObrigatorios.filter(campo => 
-                enderecoCompleto[campo] === valoresNaoDisponiveis[campo]
-            );
+           // Se algum campo estiver pendente, solicitar que o usuário forneça
+           const camposCompletos = camposPendentes.length > 0 ? camposPendentes.reduce((acc, campo) => {
+                if (!endereco[campo]) {
+                    logger.warnLogger.warn(`Campo "${campo}" pendente. Solicitando preenchimento pelo usuário`, { campo });
+                    acc.push(campo);
+                }
+                return acc;
+            }, []) : [];
 
-            if (camposPendentes.length > 0) {
-                logger.warnLogger.warn('Informações de endereço incompletas. Campos pendentes', { camposPendentes });
+            if (camposCompletos.length > 0) {
                 return res.status(400).json({
-                    message: `Os seguintes campos do endereço não foram encontrados e precisam ser fornecidos: ${camposPendentes.join(', ')}`,
-                    camposPendentes
+                    message: `Os seguintes campos do endereço estão pendentes e precisam ser fornecidos: ${camposCompletos.join(', ')}`,
+                    camposPendentes: camposCompletos
                 });
             }
 
-            // Preencher os campos de endereço com os dados retornados pela API ViaCEP
+             // Preencher os campos de endereço com os dados retornados pela API ViaCEP, ou com os dados fornecidos pelo usuário
             const novoEndereco = {
-                logradouro: enderecoCompleto.logradouro,
-                bairro: enderecoCompleto.bairro,
-                cidade: enderecoCompleto.localidade,
-                estado: enderecoCompleto.uf,
+                logradouro: enderecoCompleto.logradouro || endereco.logradouro,
+                bairro: enderecoCompleto.bairro || endereco.bairro,
+                cidade: enderecoCompleto.localidade || endereco.cidade,
+                estado: enderecoCompleto.uf || endereco.estado,
                 cep: endereco.cep,
                 numero: endereco.numero
             };
-           
             // Criação da loja com o endereço completo
             const loja = await Loja.create({ nome, endereco: novoEndereco });
 
@@ -83,13 +80,13 @@ module.exports = class LojaController {
             logger.errorLogger.error('Erro ao criar a loja', { error: err.message });
             res.status(500).json({ message: 'Erro ao criar a loja', error: err.message });
         }
-}
+    }
     // Localizar a loja mais próxima com base no CEP em um raio de 100 km
     static async localizarLoja(req, res) {
         try {
             const { cep } = req.params;
 
-            logger.infoLogger.info('Iniciando busca de loja mais próxima', { cep }); 
+            logger.infoLogger.info('Iniciando busca de loja mais próxima', { cep });
 
             // Buscar coordenadas pelo CEP do usuário
             const coordenadasUsuario = await converterCepCoordenadas(cep);
@@ -98,7 +95,7 @@ module.exports = class LojaController {
             const lojas = await Loja.find();
 
             if (lojas.length === 0) {
-                logger.warnLogger.warn('Nenhuma loja cadastrada.'); 
+                logger.warnLogger.warn('Nenhuma loja cadastrada.');
                 return res.status(404).json({ message: 'Nenhuma loja cadastrada.' });
             }
 
@@ -117,7 +114,7 @@ module.exports = class LojaController {
                         lojaMaisProxima = loja;
                     }
                 } catch (error) {
-                    logger.warnLogger.warn(`Erro ao buscar coordenadas para a loja: ${loja.nome}.`, { error: error.message }); 
+                    logger.warnLogger.warn(`Erro ao buscar coordenadas para a loja: ${loja.nome}.`, { error: error.message });
                 }
             });
 
@@ -125,14 +122,14 @@ module.exports = class LojaController {
 
             // Se não encontrar nenhuma loja dentro do raio de 100 km
             if (!lojaMaisProxima) {
-                logger.infoLogger.info('Nenhuma loja encontrada dentro de um raio de 100 km.', { cep }); 
+                logger.infoLogger.info('Nenhuma loja encontrada dentro de um raio de 100 km.', { cep });
                 return res.status(404).json({ message: 'Nenhuma loja encontrada dentro de um raio de 100 km.' });
             }
 
             logger.infoLogger.info('Loja mais próxima encontrada', {
                 loja: lojaMaisProxima.nome,
                 distancia: `${menorDistancia.toFixed(2)} km`,
-            }); 
+            });
 
             // Retornar a loja mais próxima com as informações necessárias
             res.status(200).json({
@@ -148,8 +145,8 @@ module.exports = class LojaController {
             });
 
         } catch (error) {
-            logger.errorLogger.error('Erro ao localizar loja', { error: error.message || error }); 
+            logger.errorLogger.error('Erro ao localizar loja', { error: error.message || error });
             res.status(500).json({ message: 'Erro ao localizar loja', error: error.message });
         }
-    }    
+    }
 };

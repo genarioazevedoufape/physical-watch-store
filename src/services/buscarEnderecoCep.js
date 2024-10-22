@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const getEnderecoByCep = async (cep) => {
+const buscarEnderecoCep = async (cep) => {
     try {
         const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
         if (response.data.erro) {
@@ -12,4 +12,4 @@ const getEnderecoByCep = async (cep) => {
     }
 };
 
-module.exports = { getEnderecoByCep };
+module.exports = { buscarEnderecoCep };
