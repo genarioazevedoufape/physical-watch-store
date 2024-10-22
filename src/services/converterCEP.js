@@ -3,15 +3,10 @@ const logger = require('../utils/logger');
 
 const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
 
-const logAndThrowError = (errorMsg, cep, errorDetails = {}) => {
-    logger.errorLogger.error(errorMsg, { cep, ...errorDetails });
-    throw new Error(errorMsg);
-};
-
 const converterCepCoordenadas = async (cep) => {
     if (!isValidCep(cep)) {
         const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
-        logAndThrowError(errorMsg, cep);
+        logger.errorLogger.error(errorMsg, cep);
     }
 
     try {
@@ -30,7 +25,7 @@ const converterCepCoordenadas = async (cep) => {
 
         if (!response.data.result || response.data.result.length === 0) {
             const errorMsg = 'CEP não encontrado na base de dados geocodificada.';
-            logAndThrowError(errorMsg, cep);
+            logger.errorLogger.error(errorMsg, cep);
         }
 
         const resultado = response.data.result[0];
@@ -38,7 +33,7 @@ const converterCepCoordenadas = async (cep) => {
         // Verifica se a geometria está presente
         if (!resultado.geometry || !resultado.geometry.location) {
             const errorMsg = 'Coordenadas não encontradas na resposta da API.';
-            logAndThrowError(errorMsg, cep);
+            logger.errorLogger.error(errorMsg, cep);
         }
 
         const { formatted_address, geometry } = resultado;

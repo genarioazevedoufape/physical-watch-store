@@ -227,6 +227,13 @@ module.exports = class LojaController {
         try {
             const { cep } = req.params;
 
+            const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
+            if (!isValidCep(cep)) {
+                const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
+                logger.errorLogger.error(errorMsg, cep);
+                return res.status(500).json({ error: errorMsg });
+            }
+
             logger.infoLogger.info('Iniciando busca de lojas próximas', { cep });
 
             // Buscar coordenadas pelo CEP do usuário
