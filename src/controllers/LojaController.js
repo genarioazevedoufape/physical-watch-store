@@ -66,7 +66,7 @@ module.exports = class LojaController {
                     camposPendentes: camposCompletos
                 });
             }
-
+            
              // Preencher os campos de endereço com os dados retornados pela API ViaCEP, ou com os dados fornecidos pelo usuário
             const novoEndereco = {
                 logradouro: enderecoCompleto.logradouro || endereco.logradouro,
@@ -76,8 +76,18 @@ module.exports = class LojaController {
                 cep: endereco.cep,
                 numero: endereco.numero
             };
+
+            // Buscar as coordenadas do CEP da loja
+            const coordenadasCepLoja = await converterCepCoordenadas(endereco.cep);
+
+            //Preencher as coordenadas da loja
+            const coordenadas = {
+                latitude: coordenadasCepLoja.latitude,
+                longitude: coordenadasCepLoja.longitude
+            }
+
             // Criação da loja com o endereço completo
-            const loja = await Loja.create({ nome, endereco: novoEndereco });
+            const loja = await Loja.create({ nome, endereco: novoEndereco, coordenadas: coordenadas });
 
             logger.infoLogger.info('Loja criada com sucesso', { loja });
             res.status(201).json(loja);
@@ -110,7 +120,7 @@ module.exports = class LojaController {
             // Criar um array de promessas para buscar as coordenadas de cada loja e calcular a distância
             const promessasCoordenadas = lojas.map(async (loja) => {
                 try {
-                    const coordenadasLoja = await converterCepCoordenadas(loja.endereco.cep);
+                    const coordenadasLoja = loja.coordenadas;
                     const distancia = calcularDistancia(coordenadasUsuario, coordenadasLoja);
 
                     // Se a distância for menor ou igual a 100 km, adicionar a loja à lista de lojas próximas
@@ -119,10 +129,6 @@ module.exports = class LojaController {
                             nome: loja.nome,
                             endereco: loja.endereco,
                             distancia: `${distancia.toFixed(2)} km`,
-                            coordenadas: {
-                                latitude: coordenadasLoja.latitude,
-                                longitude: coordenadasLoja.longitude,
-                            },
                         });
                     }
                 } catch (error) {
