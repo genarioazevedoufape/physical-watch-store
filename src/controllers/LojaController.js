@@ -1,4 +1,5 @@
 const Loja = require('../models/Loja');
+const mongoose = require('mongoose');
 
 const { converterCepCoordenadas } = require('../services/converterCEP');
 const { calcularDistancia } = require('../utils/calcularDistancia');
@@ -97,6 +98,130 @@ module.exports = class LojaController {
             res.status(500).json({ message: 'Erro ao criar a loja', error: err.message });
         }
     }
+
+    // Listar todas as lojas
+    static async listarLojas(req, res) {
+        try {
+            logger.infoLogger.info('Iniciando a listagem de todas as lojas');
+
+            // Obter todas as lojas do banco de dados
+            const lojas = await Loja.find();
+
+            // Verificar se existem lojas cadastradas
+            if (lojas.length === 0) {
+                logger.warnLogger.warn('Nenhuma loja cadastrada.');
+                return res.status(404).json({ message: 'Nenhuma loja cadastrada.' });
+            }
+
+            // Retornar todas as lojas
+            logger.infoLogger.info(`Foram encontradas ${lojas.length} lojas cadastradas.`);
+            res.status(200).json(lojas);
+
+        } catch (error) {
+            logger.errorLogger.error('Erro ao listar as lojas', { error: error.message });
+            res.status(500).json({ message: 'Erro ao listar as lojas', error: error.message });
+        }
+    }
+
+    // Atualizar uma loja
+    static async atualizarLoja(req, res) {
+        try {
+            const { id } = req.params;
+            const { nome, endereco } = req.body;
+
+            logger.infoLogger.info('Iniciando atualização da loja', { id });
+
+            // Verificar se o ID da loja é válido
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                logger.warnLogger.warn('ID inválido para atualizar a loja', { id });
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            // Buscar a loja pelo ID
+            const loja = await Loja.findById(id);
+
+            // Verificar se a loja existe
+            if (!loja) {
+                logger.warnLogger.warn('Loja não encontrada para o ID fornecido', { id });
+                return res.status(404).json({ message: 'Loja não encontrada.' });
+            }
+
+            // Validação de nome
+            if (nome) {
+                loja.nome = nome;
+            }
+
+            // Validação de endereço
+            if (endereco) {
+                const { cep, logradouro, bairro, cidade, estado, numero } = endereco;
+
+                const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
+                if (cep && !isValidCep(cep)) {
+                    logger.warnLogger.warn('CEP inválido ao tentar atualizar a loja', { cep });
+                    return res.status(400).json({ message: 'CEP inválido. O CEP deve ter 8 dígitos.' });
+                }
+
+                if (cep) loja.endereco.cep = cep;
+                if (logradouro) loja.endereco.logradouro = logradouro;
+                if (bairro) loja.endereco.bairro = bairro;
+                if (cidade) loja.endereco.cidade = cidade;
+                if (estado) loja.endereco.estado = estado;
+                if (numero) loja.endereco.numero = numero;
+            }
+
+            // Atualizar as coordenadas caso o CEP seja modificado
+            if (endereco?.cep) {
+                const coordenadasCepLoja = await converterCepCoordenadas(endereco.cep);
+                loja.coordenadas = {
+                    latitude: coordenadasCepLoja.latitude,
+                    longitude: coordenadasCepLoja.longitude
+                };
+            }
+
+            // Salvar as alterações no banco de dados
+            await loja.save();
+
+            logger.infoLogger.info('Loja atualizada com sucesso', { loja });
+            res.status(200).json({ message: 'Loja atualizada com sucesso.', loja });
+
+        } catch (err) {
+            logger.errorLogger.error('Erro ao atualizar a loja', { error: err.message });
+            res.status(500).json({ message: 'Erro ao atualizar a loja', error: err.message });
+        }
+    }
+
+    // Deletar uma loja
+    static async deletarLoja(req, res) {
+        try {
+            const { id } = req.params;
+
+            logger.infoLogger.info('Iniciando exclusão da loja', { id });
+
+            // Verificar se o ID da loja é válido
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                logger.warnLogger.warn('ID inválido para exclusão da loja', { id });
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            // Buscar a loja pelo ID e deletá-la
+            const loja = await Loja.findByIdAndDelete(id);
+
+            // Verificar se a loja existe
+            if (!loja) {
+                logger.warnLogger.warn('Loja não encontrada para o ID fornecido', { id });
+                return res.status(404).json({ message: 'Loja não encontrada.' });
+            }
+
+            logger.infoLogger.info('Loja deletada com sucesso', { loja });
+            res.status(200).json({ message: 'Loja deletada com sucesso.'});
+
+        } catch (err) {
+            logger.errorLogger.error('Erro ao deletar a loja', { error: err.message });
+            res.status(500).json({ message: 'Erro ao deletar a loja', error: err.message });
+        }
+    }
+
+
     // Localizar lojas a até 100 km de distância
     static async localizarLoja(req, res) {
         try {
