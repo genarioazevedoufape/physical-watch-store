@@ -1,6 +1,6 @@
 const Loja = require('../models/Loja');
 
-const { converterCepCoordenadas } = require('../services/converterCepCoordenadas');
+const { converterCepCoordenadas } = require('../services/converterCEP');
 const { calcularDistancia } = require('../utils/calcularDistancia');
 const { buscarEnderecoCep } = require('../services/buscarEnderecoCep');
 
