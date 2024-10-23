@@ -34,8 +34,11 @@ Execute o seguinte comando para instalar as dependências:
 3. **Configurar Variáveis de Ambiente**
 Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
     ```bach
-    OPENCAGE_API_KEY=SuaChaveDaAPI
-    OPENCAGE_BASE_URL=https://api.opencagedata.com/geocode/v1/json
+    DISTANCEMATRIX_API_KEY=SuaChaveDaAPI
+    DISTANCEMATRIX_BASE_URL= https://api.distancematrix.ai/maps/api/geocode/json
+    
+    MONGODB_URI= mongodb://localhost:27017/physical-watch-store
+    PORT = 3000
 
 4. **Executar a Aplicação**
 Execute o projeto via terminal:
