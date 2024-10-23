@@ -28,10 +28,10 @@ module.exports = class LojaController {
             }
 
             // Validação do campo "número"
-            if (!endereco.numero) {
-                logger.warnLogger.warn('Número inválido ao tentar criar uma loja', { numero: endereco?.numero });
-                return res.status(400).json({ message: 'O campo "número" é obrigatório.' });
-            }
+            // if (!endereco.numero) {
+            //     logger.warnLogger.warn('Número inválido ao tentar criar uma loja', { numero: endereco?.numero });
+            //     return res.status(400).json({ message: 'O campo "número" é obrigatório.' });
+            // }
 
             const lojaExistente = await Loja.findOne({ 'endereco.cep': endereco.cep });
             if (lojaExistente) {
@@ -49,7 +49,7 @@ module.exports = class LojaController {
             }
 
             // Verificar se algum campo retornado é "vazio"
-            const camposObrigatorios = ['logradouro', 'bairro', 'localidade', 'uf'];
+            const camposObrigatorios = ['logradouro', 'bairro', 'localidade', 'uf', 'numero'];
             const camposPendentes = camposObrigatorios.filter(campo => !enderecoCompleto[campo]);
 
            // Se algum campo estiver pendente, solicitar que o usuário forneça
