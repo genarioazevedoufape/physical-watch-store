@@ -27,12 +27,7 @@ module.exports = class LojaController {
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
             }
 
-            // Validação do campo "número"
-            // if (!endereco.numero) {
-            //     logger.warnLogger.warn('Número inválido ao tentar criar uma loja', { numero: endereco?.numero });
-            //     return res.status(400).json({ message: 'O campo "número" é obrigatório.' });
-            // }
-
+            // Verificar se já existe uma loja cadastrada com o mesmo CEP
             const lojaExistente = await Loja.findOne({ 'endereco.cep': endereco.cep });
             if (lojaExistente) {
                 logger.warnLogger.warn('Tentativa de criar uma loja com CEP duplicado', { cep: endereco.cep });
