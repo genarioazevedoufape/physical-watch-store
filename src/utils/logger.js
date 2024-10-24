@@ -1,6 +1,7 @@
 const { createLogger, format, transports } = require('winston');
 const { combine, timestamp, json } = format;
 
+// Logas de Informação
 const infoLogger = createLogger({
     format: combine(
         timestamp(),
@@ -11,6 +12,7 @@ const infoLogger = createLogger({
     ]
 });
 
+// Logas de Conexão
 const loggerConn = createLogger( {
     format: combine(
         timestamp(),
@@ -21,6 +23,7 @@ const loggerConn = createLogger( {
     ]
 })
 
+// Logas de Error
 const errorLogger = createLogger({
     format: combine(
         timestamp(),
@@ -31,6 +34,7 @@ const errorLogger = createLogger({
     ]
 });
 
+// Logas de Aviso
 const warnLogger = createLogger({
     format: combine(
         timestamp(),

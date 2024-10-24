@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 require('dotenv').config();
 
+// Conectando o Mongoose ao banco de dados MongoDB
 async function conn() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
