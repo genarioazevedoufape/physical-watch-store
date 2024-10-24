@@ -12,7 +12,7 @@ module.exports = class LojaController {
     // Criar uma nova loja
     static async createLoja(req, res) {
         try {
-            const { nome, endereco } = req.body;
+            const { nome, endereco, coordenadas } = req.body;
 
             // Validação do campo "nome"
             if (!nome) {
@@ -77,13 +77,25 @@ module.exports = class LojaController {
             const coordenadasCepLoja = await converterCepCoordenadas(endereco.cep);
 
             //Preencher as coordenadas da loja
-            const coordenadas = {
+            let novasCoordenadas = {
                 latitude: coordenadasCepLoja.latitude,
                 longitude: coordenadasCepLoja.longitude
             }
 
+            if (novasCoordenadas.latitude === 0 || novasCoordenadas.longitude === 0) {
+                logger.warnLogger.warn('Coordenadas não encontradas para o CEP fornecido.', { cep: endereco.cep });
+                if(!coordenadas || !coordenadas.latitude || !coordenadas.longitude) {
+                    return res.status(400).json({message: 'Coordenadas não encontradas para o CEP fornecido. Por favor, forneça latitude e longitude.'});
+                    } else {
+                        novasCoordenadas = {
+                            latitude: coordenadas.latitude,
+                            longitude: coordenadas.longitude
+                        }
+                    }
+            }
+
             // Criação da loja com o endereço completo
-            const loja = await Loja.create({ nome, endereco: novoEndereco, coordenadas: coordenadas });
+            const loja = await Loja.create({ nome, endereco: novoEndereco, coordenadas: novasCoordenadas });
 
             logger.infoLogger.info('Loja criada com sucesso', { loja });
             res.status(201).json(loja);
