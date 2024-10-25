@@ -134,7 +134,7 @@ module.exports = class LojaController {
     static async atualizarLoja(req, res) {
         try {
             const { id } = req.params;
-            const { nome, endereco } = req.body;
+            const { nome, endereco, coordenadas } = req.body;
 
             logger.infoLogger.info('Iniciando atualização da loja', { id });
 
@@ -179,9 +179,25 @@ module.exports = class LojaController {
             // Atualizar as coordenadas caso o CEP seja modificado
             if (endereco?.cep) {
                 const coordenadasCepLoja = await converterCepCoordenadas(endereco.cep);
+            //Preencher as coordenadas da loja
+            let novasCoordenadas = {
+                latitude: coordenadasCepLoja.latitude,
+                longitude: coordenadasCepLoja.longitude
+            }
+                if (novasCoordenadas.latitude === 0 || novasCoordenadas.longitude === 0) {
+                    logger.warnLogger.warn('Coordenadas não encontradas para o CEP fornecido.', { cep: endereco.cep });
+                    if(!coordenadas || !coordenadas.latitude || !coordenadas.longitude) {
+                        return res.status(400).json({message: 'Coordenadas não encontradas para o CEP fornecido. Por favor, forneça latitude e longitude.'});
+                        } else {
+                            novasCoordenadas = {
+                                latitude: coordenadas.latitude,
+                                longitude: coordenadas.longitude
+                            }
+                        }
+                }
                 loja.coordenadas = {
-                    latitude: coordenadasCepLoja.latitude,
-                    longitude: coordenadasCepLoja.longitude
+                    latitude: novasCoordenadas.latitude,
+                    longitude: novasCoordenadas.longitude
                 };
             }
 
