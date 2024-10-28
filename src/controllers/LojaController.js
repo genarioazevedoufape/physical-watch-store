@@ -7,6 +7,7 @@ const { buscarEnderecoCep } = require('../services/buscarEnderecoCep');
 
 const logger = require('../utils/logger');
 
+const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
 module.exports = class LojaController {
 
     // Criar uma nova loja
@@ -21,7 +22,6 @@ module.exports = class LojaController {
             }
 
             // Validação do campo "cep"
-            const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
             if (!endereco || !endereco.cep || !isValidCep(endereco.cep)) {
                 logger.warnLogger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep });
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
@@ -193,8 +193,7 @@ module.exports = class LojaController {
             if (endereco) {
                 const { cep, logradouro, bairro, cidade, estado, numero } = endereco;
 
-                const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
-                if (cep && !isValidCep(cep)) {
+                    if (cep && !isValidCep(cep)) {
                     logger.warnLogger.warn('CEP inválido ao tentar atualizar a loja', { cep });
                     return res.status(400).json({ message: 'CEP inválido. O CEP deve ter 8 dígitos.' });
                 }
@@ -281,7 +280,6 @@ module.exports = class LojaController {
         try {
             const { cep } = req.params;
 
-            const isValidCep = (cep) => /^[0-9]{8}$/.test(cep);
             if (!isValidCep(cep)) {
                 const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
                 logger.errorLogger.error(errorMsg, cep);
