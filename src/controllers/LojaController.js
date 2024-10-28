@@ -27,11 +27,11 @@ module.exports = class LojaController {
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
             }
 
-            // Verificar se já existe uma loja cadastrada com o mesmo CEP
-            const lojaExistente = await Loja.findOne({ 'endereco.cep': endereco.cep });
+            // Verificar se já existe uma loja cadastrada com o mesmo CEP e número
+            const lojaExistente = await Loja.findOne({ 'endereco.cep': endereco.cep, 'endereco.numero': endereco.numero });
             if (lojaExistente) {
-                logger.warnLogger.warn('Tentativa de criar uma loja com CEP duplicado', { cep: endereco.cep });
-                return res.status(400).json({ message: 'Já existe uma loja cadastrada com este CEP.' });
+                logger.warnLogger.warn('Tentativa de criar uma loja com CEP e número duplicados', { cep: endereco.cep, numero: endereco.numero });
+                return res.status(400).json({ message: 'Já existe uma loja cadastrada com este CEP e número.' });
             }
 
             // Buscar o endereço completo pelo CEP utilizando a API ViaCEP
