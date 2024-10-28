@@ -130,6 +130,37 @@ module.exports = class LojaController {
         }
     }
 
+    // Buscar uma loja pelo ID
+    static async buscarLojaPorId(req, res) {
+        try {
+            const { id } = req.params;
+
+            logger.infoLogger.info('Iniciando busca da loja pelo ID', { id });
+
+            // Verificar se o ID da loja é válido
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                logger.warnLogger.warn('ID inválido para buscar a loja', { id });
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            // Buscar a loja pelo ID
+            const loja = await Loja.findById(id);
+
+            // Verificar se a loja existe
+            if (!loja) {
+                logger.warnLogger.warn('Loja não encontrada para o ID fornecido', { id });
+                return res.status(404).json({ message: 'Loja não encontrada.' });
+            }
+
+            logger.infoLogger.info('Loja encontrada com sucesso', { loja });
+            res.status(200).json(loja);
+
+        } catch (err) {
+            logger.errorLogger.error('Erro ao buscar a loja pelo ID', { error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar a loja pelo ID', error: err.message });
+        }
+    }
+
     // Atualizar uma loja
     static async atualizarLoja(req, res) {
         try {

@@ -16,6 +16,12 @@ router.get(
     LojaController.listarLojas,
 );
 
+// Buscar loja por ID
+router.get(
+    '/buscar/:id', 
+    LojaController.buscarLojaPorId,
+);
+
 // Atualizar loja
 router.put(
     '/:id', 
