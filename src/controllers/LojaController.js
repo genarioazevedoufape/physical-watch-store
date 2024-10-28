@@ -299,22 +299,30 @@ module.exports = class LojaController {
             }
 
             // Filtrar e mapear diretamente as lojas dentro do raio de 100 km
-            const lojasProximas = lojas
-                .map((loja) => {
-                    const coordenadasLoja = loja.coordenadas;
-                    const distancia = calcularDistancia(coordenadasUsuario, coordenadasLoja);
+            const filtroLojasProximas = lojas
+            .map((loja) => {
+              const coordenadasLoja = loja.coordenadas;
+              const distancia = calcularDistancia(coordenadasUsuario, coordenadasLoja);
+          
+              // Retornar somente as lojas dentro do raio de 100 km
+              if (distancia <= 100) {
+                return {
+                  nome: loja.nome,
+                  endereco: loja.endereco,
+                  distancia: distancia, // Mantenha a distância como número para ordenação
+                };
+              }
+              return null; // Retorna null para lojas fora do raio
+            })
+            .filter(Boolean) // Remove os valores nulos resultantes do mapeamento
+            .sort((a, b) => a.distancia - b.distancia); // Ordena da maior para a menor distância
 
-                    // Retornar somente as lojas dentro do raio de 100 km
-                    if (distancia <= 100) {
-                        return {
-                            nome: loja.nome,
-                            endereco: loja.endereco,
-                            distancia: `${distancia.toFixed(2)} km`,
-                        };
-                    }
-                    return null; // Retorna null para lojas fora do raio
-                })
-                .filter(Boolean); // Remove os valores nulos resultantes do mapeamento
+            // Se desejar formatar a distância para exibição
+            const lojasProximas = filtroLojasProximas.map((loja) => ({
+                nome: loja.nome,
+                endereco: loja.endereco,
+                distancia: `${loja.distancia.toFixed(2)} km`, // Formata a distância como string
+            }));
 
             // Se não encontrar nenhuma loja dentro do raio de 100 km
             if (lojasProximas.length === 0) {
