@@ -274,72 +274,66 @@ module.exports = class LojaController {
         }
     }
 
-
     // Localizar lojas a até 100 km de distância
     static async localizarLoja(req, res) {
         try {
             const { cep } = req.params;
-
+    
             if (!isValidCep(cep)) {
                 const errorMsg = 'Formato de CEP inválido. O CEP deve conter 8 dígitos numéricos.';
                 logger.errorLogger.error(errorMsg, cep);
-                return res.status(500).json({ error: errorMsg });
+                return res.status(400).json({ error: errorMsg });
             }
-
+    
             logger.infoLogger.info('Iniciando busca de lojas próximas', { cep });
-
+    
             // Buscar coordenadas pelo CEP do usuário
             const coordenadasUsuario = await converterCepCoordenadas(cep);
-
+    
             // Obter todas as lojas cadastradas no banco de dados
             const lojas = await Loja.find();
-
+    
             if (lojas.length === 0) {
                 logger.warnLogger.warn('Nenhuma loja cadastrada.');
                 return res.status(404).json({ message: 'Nenhuma loja cadastrada.' });
             }
-
-            const lojasProximas = [];
-
-            // Criar um array de promessas para buscar as coordenadas de cada loja e calcular a distância
-            const promessasCoordenadas = lojas.map(async (loja) => {
-                try {
+    
+            // Filtrar e mapear diretamente as lojas dentro do raio de 100 km
+            const lojasProximas = lojas
+                .map((loja) => {
                     const coordenadasLoja = loja.coordenadas;
                     const distancia = calcularDistancia(coordenadasUsuario, coordenadasLoja);
-
-                    // Se a distância for menor ou igual a 100 km, adicionar a loja à lista de lojas próximas
+    
+                    // Retornar somente as lojas dentro do raio de 100 km
                     if (distancia <= 100) {
-                        lojasProximas.push({
+                        return {
                             nome: loja.nome,
                             endereco: loja.endereco,
                             distancia: `${distancia.toFixed(2)} km`,
-                        });
+                        };
                     }
-                } catch (error) {
-                    logger.warnLogger.warn(`Erro ao buscar coordenadas para a loja: ${loja.nome}.`, { error: error.message });
-                }
-            });
-
-            // Esperar que todas as promessas de coordenadas sejam resolvidas
-            await Promise.all(promessasCoordenadas);
-
+                    return null; // Retorna null para lojas fora do raio
+                })
+                .filter(Boolean); // Remove os valores nulos resultantes do mapeamento
+    
             // Se não encontrar nenhuma loja dentro do raio de 100 km
             if (lojasProximas.length === 0) {
                 logger.infoLogger.info('Nenhuma loja encontrada dentro de um raio de 100 km.', { cep });
                 return res.status(404).json({ message: 'Nenhuma loja encontrada dentro de um raio de 100 km.' });
             }
-
+    
             logger.infoLogger.info('Lojas próximas encontradas', {
                 totalLojas: lojasProximas.length,
                 cepUsuario: cep
             });
-
+    
             // Retornar as lojas dentro do raio de 100 km
             res.status(200).json({ lojas: lojasProximas });
-
+    
         } catch (error) {
             logger.errorLogger.error('Erro ao localizar lojas', { error: error.message || error });
             res.status(500).json({ message: 'Erro ao localizar lojas', error: error.message });
         }
     }
+    
 }
