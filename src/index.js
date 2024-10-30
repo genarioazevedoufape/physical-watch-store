@@ -1,6 +1,7 @@
 const express = require('express');
 const conn = require('./db/conn');
 const logger = require('./utils/logger');
+const cors = require('cors');
 
 
 const PORT = process.env.PORT 
@@ -10,6 +11,9 @@ const app = express();
 
 //Config json response
 app.use(express.json());
+
+//Config cors
+app.use(cors());
 
 //Connect to database
 conn();
