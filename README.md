@@ -9,13 +9,13 @@ Este é o primeiro desafio avaliativo do programa Bolsas CompassUol. O projeto c
   * Banco de dados: MongoDB 
   * Framework: NodeJS
   * Bibliotecas
-  - Express
-  - Mongoose
-  - dotenv
-  - nodemon
-  - axios
-  - cors
-  - winston
+   Express
+   Mongoose
+   dotenv
+   nodemon
+   axios
+   cors
+   winston
 
 ### Funcionalidades
 * **Cadastro de lojas:** Permite adicionar novas lojas ao sistema.
