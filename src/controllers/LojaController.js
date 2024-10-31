@@ -13,7 +13,7 @@ module.exports = class LojaController {
     // Criar uma nova loja
     static async createLoja(req, res) {
         try {
-            const { nome, endereco, coordenadas } = req.body;
+            const { nome, endereco, coordenadas, informacoes } = req.body;
 
             // Validação do campo "nome"
             if (!nome) {
@@ -25,6 +25,12 @@ module.exports = class LojaController {
             if (!endereco || !endereco.cep || !isValidCep(endereco.cep)) {
                 logger.warnLogger.warn('CEP inválido ao tentar criar uma loja', { cep: endereco?.cep });
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
+            }
+
+            // Validação dos campos de informações (funcionamento e dias de funcionamento)
+            if (!informacoes || !informacoes.horarioFuncionamento || !informacoes.diasFuncionamento) {
+                logger.warnLogger.warn('Informações de funcionamento ausentes ao tentar criar uma loja', { informacoes });
+                return res.status(400).json({ message: 'Os campos "Horário de funcionamento" e "Dias de Funcionamento" são obrigatórios.' });
             }
 
             // Verificar se já existe uma loja cadastrada com o mesmo CEP e número
@@ -95,7 +101,7 @@ module.exports = class LojaController {
             }
 
             // Criação da loja com o endereço completo
-            const loja = await Loja.create({ nome, endereco: novoEndereco, coordenadas: novasCoordenadas });
+            const loja = await Loja.create({ nome, endereco: novoEndereco, coordenadas: novasCoordenadas, informacoes });
 
             logger.infoLogger.info('Loja criada com sucesso', { loja });
             res.status(201).json(loja);
@@ -165,7 +171,7 @@ module.exports = class LojaController {
     static async atualizarLoja(req, res) {
         try {
             const { id } = req.params;
-            const { nome, endereco, coordenadas } = req.body;
+            const { nome, endereco, coordenadas, informacoes } = req.body;
 
             logger.infoLogger.info('Iniciando atualização da loja', { id });
 
@@ -196,19 +202,20 @@ module.exports = class LojaController {
                     if (cep && !isValidCep(cep)) {
                     logger.warnLogger.warn('CEP inválido ao tentar atualizar a loja', { cep });
                     return res.status(400).json({ message: 'CEP inválido. O CEP deve ter 8 dígitos.' });
-                }
+                    }
 
-                if (cep) loja.endereco.cep = cep;
-                if (logradouro) loja.endereco.logradouro = logradouro;
-                if (bairro) loja.endereco.bairro = bairro;
-                if (cidade) loja.endereco.cidade = cidade;
-                if (estado) loja.endereco.estado = estado;
-                if (numero) loja.endereco.numero = numero;
+                    if (cep) loja.endereco.cep = cep;
+                    if (logradouro) loja.endereco.logradouro = logradouro;
+                    if (bairro) loja.endereco.bairro = bairro;
+                    if (cidade) loja.endereco.cidade = cidade;
+                    if (estado) loja.endereco.estado = estado;
+                    if (numero) loja.endereco.numero = numero;
             }
 
             // Atualizar as coordenadas caso o CEP seja modificado
             if (endereco?.cep) {
                 const coordenadasCepLoja = await converterCepCoordenadas(endereco.cep);
+                
             //Preencher as coordenadas da loja
             let novasCoordenadas = {
                 latitude: coordenadasCepLoja.latitude,
@@ -229,6 +236,25 @@ module.exports = class LojaController {
                     latitude: novasCoordenadas.latitude,
                     longitude: novasCoordenadas.longitude
                 };
+            }
+            
+            // Atualizar informações de funcionamento
+            if (informacoes) {
+                const { horarioFuncionamento, diasFuncionamento } = informacoes;
+
+                // Atualizar cada campo se ele estiver presente
+                if (horarioFuncionamento) {
+                    loja.informacoes.horarioFuncionamento = horarioFuncionamento;
+                }
+                if (diasFuncionamento) {
+                    loja.informacoes.diasFuncionamento = diasFuncionamento;
+                }
+
+                // Log de validação para os campos informados
+                if (!horarioFuncionamento && !diasFuncionamento) {
+                    logger.warnLogger.warn('Nenhum campo válido para atualizar em "informações"', { informacoes });
+                    return res.status(400).json({ message: 'Informe ao menos um dos campos: "Horário de funcionamento" ou "Dias de Funcionamento".' });
+                }
             }
 
             // Salvar as alterações no banco de dados
@@ -309,7 +335,8 @@ module.exports = class LojaController {
                 return {
                   nome: loja.nome,
                   endereco: loja.endereco,
-                  distancia: distancia, // Mantenha a distância como número para ordenação
+                  distancia: distancia,
+                  informacoes: loja.informacoes
                 };
               }
               return null; // Retorna null para lojas fora do raio
@@ -321,7 +348,8 @@ module.exports = class LojaController {
             const lojasProximas = filtroLojasProximas.map((loja) => ({
                 nome: loja.nome,
                 endereco: loja.endereco,
-                distancia: `${loja.distancia.toFixed(2)} km`, // Formata a distância como string
+                distancia: `${loja.distancia.toFixed(2)} km`, 
+                informacoes: loja.informacoes
             }));
 
             // Se não encontrar nenhuma loja dentro do raio de 100 km

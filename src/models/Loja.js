@@ -44,6 +44,16 @@ const Loja = mongoose.model(
                 required: true
             }
         },
+        informacoes: {
+            horarioFuncionamento: {
+                type: String,
+                required: true
+            },
+            diasFuncionamento: {
+                type: String,
+                required: true
+            },
+        }
     }, { timestamps: true })
 );
 module.exports = Loja;
