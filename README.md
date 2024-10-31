@@ -59,7 +59,8 @@ Execute o projeto via terminal:
 Os logs gerados pela aplicação serão armazenados no arquivo logs/logs.json, contendo informações sobre as ações da aplicação.
 
 6. **Frot-end**
-Para os testes da API pode ser utilizado o seguinte repositório: git@github.com:genarioazevedoufape/front-end-physical-watch-store.git
+Para os testes da API pode ser utilizado o seguinte repositório: 
+    <a href="http://git@github.com:genarioazevedoufape/front-end-physical-watch-store.git">front-end-physical-watch-store</a>
 
 ### Considerações Finais
 Este projeto faz parte do desafio Bolsas CompassUol e foi desenvolvido seguindo as melhores práticas de desenvolvimento de software, visando um código limpo, organizado e de fácil manutenção.
