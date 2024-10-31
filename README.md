@@ -8,9 +8,19 @@ Este é o primeiro desafio avaliativo do programa Bolsas CompassUol. O projeto c
   * Linguagens: JavaScript
   * Banco de dados: MongoDB 
   * Framework: NodeJS
+  * Bibliotecas
+  - Express
+  - Mongoose
+  - dotenv
+  - nodemon
+  - axios
+  - cors
+  - winston
 
 ### Funcionalidades
 * **Cadastro de lojas:** Permite adicionar novas lojas ao sistema.
+* **Atualização:** Permite atualizar os dados da loja.
+* **Deletar:** Permite deletar uma loja.
 * **Busca de lojas:** Encontra lojas próximas a um determinado CEP, utilizando a API ViaCEP.
 * **Geração de logs:** Registra todas as ações e erros em formato JSON, utilizando o Winston.
 
@@ -47,6 +57,9 @@ Execute o projeto via terminal:
 
 5. **Logs**
 Os logs gerados pela aplicação serão armazenados no arquivo logs/logs.json, contendo informações sobre as ações da aplicação.
+
+6. **Frot-end**
+Para os testes da API pode ser utilizado o seguinte repositório: <a href="git@github.com:genarioazevedoufape/front-end-physical-watch-store.git">front-end-physical-watch-store</a>
 
 ### Considerações Finais
 Este projeto faz parte do desafio Bolsas CompassUol e foi desenvolvido seguindo as melhores práticas de desenvolvimento de software, visando um código limpo, organizado e de fácil manutenção.
