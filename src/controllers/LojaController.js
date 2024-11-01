@@ -27,12 +27,6 @@ module.exports = class LojaController {
                 return res.status(400).json({ message: 'O campo "cep" é obrigatório e deve ser um CEP válido de 8 dígitos.' });
             }
 
-            // Validação dos campos de informações (funcionamento e dias de funcionamento)
-            if (!informacoes || !informacoes.horarioFuncionamento || !informacoes.diasFuncionamento) {
-                logger.warnLogger.warn('Informações de funcionamento ausentes ao tentar criar uma loja', { informacoes });
-                return res.status(400).json({ message: 'Os campos "Horário de funcionamento" e "Dias de Funcionamento" são obrigatórios.' });
-            }
-
             // Verificar se já existe uma loja cadastrada com o mesmo CEP e número
             const lojaExistente = await Loja.findOne({ 'endereco.cep': endereco.cep, 'endereco.numero': endereco.numero });
             if (lojaExistente) {
@@ -98,6 +92,12 @@ module.exports = class LojaController {
                             longitude: coordenadas.longitude
                         }
                     }
+            }
+            
+            // Validação dos campos de informações (funcionamento e dias de funcionamento)
+            if (!informacoes || !informacoes.horarioFuncionamento || !informacoes.diasFuncionamento) {
+                logger.warnLogger.warn('Informações de funcionamento ausentes ao tentar criar uma loja', { informacoes });
+                return res.status(400).json({ message: 'Os campos "Horário de funcionamento" e "Dias de Funcionamento" são obrigatórios.' });
             }
 
             // Criação da loja com o endereço completo
